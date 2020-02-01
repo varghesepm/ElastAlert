@@ -1,0 +1,46 @@
+name: RegEx Rule tester
+type: frequency
+index: filebeat-*
+num_events: 1
+timeframe:
+  minutes: 1
+realert:
+  minutes: 0
+aggregation:
+  schedule: '*/1 * * * *'
+aggregation_key: 'system.syslog.program'
+
+filter:
+
+# - query:
+#     wildcard:
+#       system.syslog.program: "MANUTD"
+# - term:
+#     system.syslog.program: "MANUTD"
+- query:
+      query_string:
+        query: "system.syslog.message: \"*cluster?domain\""
+
+# (Required)
+# The alert is use when a match is found
+alert:
+- "slack"
+
+# (required, email specific)
+# a list of email addresses to send alerts to
+slack:
+slack_webhook_url: "XXXXX"
+alert_subject: "Triggered {0} in {1} at {2}"
+alert_subject_args:
+  - system.syslog.program
+  - system.syslog.message
+  - "@timestamp"
+alert_text: |
+        Time: {0}
+        ES Document ID: {1}
+        Program: {2}
+        Message: {3}
+        System Time: {4}
+alert_text_args: ["@timestamp", "_id", "system.syslog.program", "system.syslog.message", "system.syslog.timestamp",]
+alert_text_type: alert_text_only
+
